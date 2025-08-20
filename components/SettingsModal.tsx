@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { Modal, Portal, Button, Text, TextInput, SegmentedButtons, useTheme } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getProviderConfig, getProviderNames, DEFAULT_PROVIDER } from '../config/llmProviders';
@@ -23,6 +23,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   const theme = useTheme();
 
   const providers = getProviderNames();
+  const screenHeight = Dimensions.get('window').height;
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -75,9 +76,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
       <Modal
         visible={visible}
         onDismiss={onDismiss}
-        contentContainerStyle={styles.modal}
+        contentContainerStyle={[styles.modal, { maxHeight: screenHeight * 0.8 }]}
       >
-        <ScrollView style={styles.scrollView}>
+        <ScrollView 
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={true}
+          nestedScrollEnabled={true}
+        >
           <Text variant="headlineSmall" style={styles.title}>
             LLM Settings
           </Text>
@@ -86,15 +91,22 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             <Text variant="titleMedium" style={styles.sectionTitle}>
               Select Provider
             </Text>
-            <SegmentedButtons
-              value={selectedProvider}
-              onValueChange={handleProviderChange}
-              buttons={providers.map(provider => ({
-                value: provider,
-                label: getProviderConfig(provider).name,
-              }))}
-              style={styles.segmentedButtons}
-            />
+            <View style={styles.providerButtonsContainer}>
+              {providers.map(provider => (
+                <Button
+                  key={provider}
+                  mode={selectedProvider === provider ? 'contained' : 'outlined'}
+                  onPress={() => handleProviderChange(provider)}
+                  style={[
+                    styles.providerButton,
+                    selectedProvider === provider && styles.selectedProviderButton
+                  ]}
+                  labelStyle={styles.providerButtonLabel}
+                >
+                  {getProviderConfig(provider).name}
+                </Button>
+              ))}
+            </View>
           </View>
 
           <View style={styles.section}>
@@ -179,8 +191,23 @@ const styles = StyleSheet.create({
     color: '#555',
     fontWeight: '600',
   },
-  segmentedButtons: {
+  providerButtonsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  providerButton: {
+    flex: 1,
+    minWidth: '45%',
     marginBottom: 8,
+  },
+  selectedProviderButton: {
+    backgroundColor: '#007AFF',
+  },
+  providerButtonLabel: {
+    fontSize: 12,
+    textAlign: 'center',
   },
   infoContainer: {
     backgroundColor: '#f5f5f5',
@@ -208,6 +235,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
+    marginBottom: 10,
   },
   button: {
     flex: 1,

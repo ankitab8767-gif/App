@@ -34,7 +34,7 @@ export const LLM_PROVIDERS: Record<string, LLMProvider> = {
     authPrefix: 'Bearer',
   },
   gemini: {
-    name: 'Google Gemini',
+    name: 'Gemini',
     apiUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
     model: 'gemini-pro',
     requiresAuth: true,
